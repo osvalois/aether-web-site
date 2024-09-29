@@ -10,10 +10,14 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^1.1.3"
+    "@astrodraw/astrochart": "^3.0.2",
+    "astro": "^1.1.3",
+    "papaparse": "^5.4.1",
+    "socket.io-client": "^4.8.0"
   },
   "devDependencies": {
     "@astrojs/sitemap": "^1.0.0",
+    "@types/papaparse": "^5.3.14",
     "astro-icon": "^0.7.3"
   }
 }

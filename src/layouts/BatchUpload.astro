@@ -1,0 +1,543 @@
+---
+import Layout from '../layouts/Page.astro'
+import Container from '../components/Container.astro';
+import Button from '../components/Button.astro';
+
+const seo = {
+  title: 'Flight Management Dashboard',
+  description: 'Real-time flight management, weather reports, and analytics',
+}
+---
+
+<Layout seo={seo}>
+  <Container>
+    <div class="dashboard-container">
+      <header class="dashboard-header">
+        <h1 class="fade-in">Flight Management Dashboard</h1>
+        <div id="connectionStatus" class="connection-status">Connecting...</div>
+      </header>
+      
+      <div class="dashboard-grid">
+        <!-- Flight Ticket Management Section -->
+        <section class="dashboard-panel fade-in">
+          <h2>Flight Ticket Management</h2>
+          <div class="upload-form">
+            <input type="file" id="csvFile" accept=".csv" class="file-input" />
+            <Button id="uploadButton" class="primary-button">Upload and Process CSV</Button>
+          </div>
+          <div id="progressContainer" class="progress-container" style="display: none;">
+            <div id="progressBar" class="progress-bar"></div>
+            <p id="progressText" class="progress-text"></p>
+          </div>
+          <div id="resultContainer" class="result-container" style="display: none;">
+            <h3>Processing Results</h3>
+            <div class="result-stats">
+              <div class="stat-item">
+                <span class="stat-label">Successful:</span>
+                <span id="successCount" class="stat-value">0</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Failed:</span>
+                <span id="failureCount" class="stat-value">0</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Flight Search Section -->
+        <section class="dashboard-panel fade-in">
+          <h2>Flight Search</h2>
+          <div class="search-form">
+            <input type="text" id="originSearch" placeholder="Origin" class="search-input" />
+            <input type="text" id="destinationSearch" placeholder="Destination" class="search-input" />
+            <Button id="searchButton" class="primary-button">Search Flights</Button>
+          </div>
+          <div id="searchResults" class="search-results"></div>
+        </section>
+
+        <!-- Weather Report Section -->
+        <section class="dashboard-panel fade-in">
+          <h2>Weather Report</h2>
+          <div class="weather-form">
+            <input type="text" id="airportCode" placeholder="Airport IATA Code" class="search-input" />
+            <Button id="getWeatherButton" class="primary-button">Get Weather</Button>
+          </div>
+          <div id="weatherResult" class="weather-result"></div>
+        </section>
+
+        <!-- Flight Report Section -->
+        <section class="dashboard-panel fade-in">
+          <h2>Flight Report</h2>
+          <div class="report-form">
+            <input type="text" id="flightId" placeholder="Flight ID" class="search-input" />
+            <Button id="generateReportButton" class="primary-button">Generate Report</Button>
+          </div>
+          <div id="reportResult" class="report-result"></div>
+        </section>
+
+        <!-- Real-time Updates Section -->
+        <section class="dashboard-panel fade-in">
+          <h2>Real-time Updates</h2>
+          <div id="realtimeUpdates" class="realtime-updates">
+            <ul id="updatesList"></ul>
+          </div>
+        </section>
+      </div>
+    </div>
+  </Container>
+</Layout>
+
+<style>
+  .dashboard-container {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  }
+
+  .dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+
+  .connection-status {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+  }
+
+  .dashboard-panel {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 1.5rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .dashboard-panel:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  h1, h2 {
+    color: #ffffff;
+    margin-bottom: 1rem;
+  }
+
+  .upload-form, .search-form, .weather-form, .report-form {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .file-input, .search-input {
+    flex-grow: 1;
+    padding: 0.75rem;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: #ffffff;
+    transition: background 0.3s ease;
+  }
+
+  .file-input:hover, .search-input:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .primary-button {
+    background: linear-gradient(45deg, #4a90e2, #63b3ed);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.1s ease;
+  }
+
+  .primary-button:hover {
+    transform: scale(1.05);
+  }
+
+  .progress-container {
+    margin-top: 1rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 10px;
+    background: linear-gradient(90deg, #4a90e2, #63b3ed);
+    transition: width 0.3s ease;
+  }
+
+  .progress-text {
+    text-align: center;
+    margin-top: 0.5rem;
+    color: #ffffff;
+  }
+
+  .result-container, .search-results, .weather-result, .report-result, .realtime-updates {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  .result-stats {
+    display: flex;
+    justify-content: space-around;
+  }
+
+  .stat-item {
+    text-align: center;
+  }
+
+  .stat-label {
+    font-size: 0.9rem;
+    color: #a0aec0;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #ffffff;
+  }
+
+  .fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  #updatesList {
+    list-style-type: none;
+    padding: 0;
+  }
+
+  #updatesList li {
+    padding: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: background-color 0.3s ease;
+  }
+
+  #updatesList li:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+</style>
+
+<script>
+  import Papa from 'papaparse';
+  import { io } from 'socket.io-client';
+
+  const socket = io('http://localhost:3030');
+  const connectionStatus = document.getElementById('connectionStatus');
+  const updatesList = document.getElementById('updatesList');
+
+  socket.on('connect', () => {
+    connectionStatus.textContent = 'Connected';
+    connectionStatus.style.backgroundColor = '#4caf50';
+  });
+
+  socket.on('disconnect', () => {
+    connectionStatus.textContent = 'Disconnected';
+    connectionStatus.style.backgroundColor = '#f44336';
+  });
+
+  // Listen for real-time updates
+  socket.on('flightUpdate', (update) => {
+    const li = document.createElement('li');
+    li.textContent = `${new Date().toLocaleTimeString()}: ${update.message}`;
+    updatesList.prepend(li);
+    if (updatesList.children.length > 10) {
+      updatesList.removeChild(updatesList.lastChild);
+    }
+  });
+
+  // File upload and processing
+  const csvFile = document.getElementById('csvFile') as HTMLInputElement;
+  const uploadButton = document.getElementById('uploadButton');
+  const progressContainer = document.getElementById('progressContainer');
+  const progressBar = document.getElementById('progressBar');
+  const progressText = document.getElementById('progressText');
+  const resultContainer = document.getElementById('resultContainer');
+  const successCount = document.getElementById('successCount');
+  const failureCount = document.getElementById('failureCount');
+
+  uploadButton.addEventListener('click', handleUpload);
+
+  async function handleUpload() {
+    if (!csvFile.files || csvFile.files.length === 0) {
+      alert('Please select a CSV file');
+      return;
+    }
+
+    const file = csvFile.files[0];
+    const reader = new FileReader();
+
+    reader.onload = async function(e) {
+      const csv = e.target.result;
+      const results = Papa.parse(csv, { header: true });
+      const data = results.data;
+
+      progressContainer.style.display = 'block';
+      resultContainer.style.display = 'none';
+
+      let processed = 0;
+      let successfulCount = 0;
+      let failedCount = 0;
+
+      const batchSize = 100;
+      for (let i = 0; i < data.length; i += batchSize) {
+        const batch = data.slice(i, i + batchSize);
+        const flightTickets = batch.map(row => ({
+          origin: row.origin,
+          destination: row.destination,
+          airline: row.airline,
+          flightNum: row.flight_num,
+          originAirport: {
+            iataCode: row.origin_iata_code,
+            name: row.origin_name,
+            latitude: parseFloat(row.origin_latitude),
+            longitude: parseFloat(row.origin_longitude)
+          },
+          destinationAirport: {
+            iataCode: row.destination_iata_code,
+            name: row.destination_name,
+            latitude: parseFloat(row.destination_latitude),
+            longitude: parseFloat(row.destination_longitude)
+          }
+        }));
+
+        try {
+          const response = await fetch('http://localhost:3030/flights/bulk', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ flightTickets }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const result = await response.json();
+          successfulCount += result.successCount;
+          failedCount += result.failureCount;
+        } catch (error) {
+          console.error('Error processing batch:', error);
+          failedCount += batch.length;
+        }
+
+        processed += batch.length;
+        const progress = (processed / data.length) * 100;
+        progressBar.style.width = `${progress}%`;
+        progressText.textContent = `Processed ${processed} of ${data.length} records`;
+      }
+
+      resultContainer.style.display = 'block';
+      successCount.textContent = successfulCount.toString();
+      failureCount.textContent = failedCount.toString();
+    };
+
+    reader.readAsText(file);
+  }
+
+  // Flight search
+  const originSearch = document.getElementById('originSearch') as HTMLInputElement;
+  const destinationSearch = document.getElementById('destinationSearch') as HTMLInputElement;
+  const searchButton = document.getElementById('searchButton');
+  const searchResults = document.getElementById('searchResults');
+
+  searchButton.addEventListener('click', handleSearch);
+
+  async function handleSearch() {
+    const origin = originSearch.value;
+    const destination = destinationSearch.value;
+
+    if (!origin) {
+      alert('Please enter a value for origin');
+      return;
+    }
+
+    try {
+      let url = `http://localhost:3030/flights?origin=${origin}`;
+      if (destination) {
+        url += `&destination=${destination}`;
+      }
+
+      searchResults.innerHTML = '<p>Searching for flights...</p>';
+
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const flights = await response.json();
+      displaySearchResults(flights);
+    } catch (error) {
+      console.error('Error searching flights:', error);
+      searchResults.innerHTML = '<p>Error searching flights. Please try again.</p>';
+    }
+  }
+
+  function displaySearchResults(flights) {
+    searchResults.innerHTML = '';
+    if (flights.length === 0) {
+      searchResults.innerHTML = '<p>No flights found.</p>';
+      return;
+    }
+    const ul = document.createElement('ul');
+    flights.data.forEach(flight => {
+      const li = document.createElement('li');
+      li.textContent = `${flight.airline}${flight.flightNum}: ${flight.origin} to ${flight.destination}`;
+      ul.appendChild(li);
+    });
+    searchResults.appendChild(ul);
+  }
+
+  // Weather report
+  const airportCode = document.getElementById('airportCode') as HTMLInputElement;
+  const getWeatherButton = document.getElementById('getWeatherButton');
+  const weatherResult = document.getElementById('weatherResult');
+
+  getWeatherButton.addEventListener('click', handleWeatherRequest);
+
+  async function handleWeatherRequest() {
+    const iataCode = airportCode.value;
+    try {
+      const response = await fetch(`http://localhost:3030/weather/${iataCode}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const weatherData = await response.json();displayWeatherResult(weatherData);
+    } catch (error) {
+      console.error('Error fetching weather data:', error);
+      weatherResult.innerHTML = '<p class="error-message">Error fetching weather data. Please try again.</p>';
+    }
+  }
+
+  function displayWeatherResult(weatherData) {
+    weatherResult.innerHTML = `
+      <div class="weather-card">
+        <h3>${weatherData.airport}</h3>
+        <div class="weather-info">
+          <p><i class="fas fa-thermometer-half"></i> ${weatherData.temperature}°C</p>
+          <p><i class="fas fa-cloud"></i> ${weatherData.conditions}</p>
+          <p><i class="fas fa-wind"></i> ${weatherData.windSpeed} km/h, ${weatherData.windDirection}</p>
+        </div>
+      </div>
+    `;
+  }
+
+  // Flight report
+  const flightId = document.getElementById('flightId') as HTMLInputElement;
+  const generateReportButton = document.getElementById('generateReportButton');
+  const reportResult = document.getElementById('reportResult');
+
+  generateReportButton.addEventListener('click', handleReportGeneration);
+
+  async function handleReportGeneration() {
+    const id = flightId.value;
+    try {
+      reportResult.innerHTML = '<p>Generating report...</p>';
+      const response = await fetch(`http://localhost:3030/reports/${id}`, { method: 'POST' });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const report = await response.json();
+      displayReportResult(report);
+    } catch (error) {
+      console.error('Error generating report:', error);
+      reportResult.innerHTML = '<p class="error-message">Error generating report. Please try again.</p>';
+    }
+  }
+
+  function displayReportResult(report) {
+    reportResult.innerHTML = `
+      <div class="report-card">
+        <h3>Flight Weather Report</h3>
+        <div class="report-info">
+          <p><strong>Flight:</strong> ${report.airline}${report.flightNum}</p>
+          <p><strong>Origin:</strong> ${report.origin} - ${report.originWeather}</p>
+          <p><strong>Destination:</strong> ${report.destination} - ${report.destinationWeather}</p>
+          <p><strong>Status:</strong> <span class="status ${report.status.toLowerCase()}">${report.status}</span></p>
+        </div>
+      </div>
+    `;
+  }
+
+  // Real-time updates handling
+  function addUpdate(message) {
+    const li = document.createElement('li');
+    li.innerHTML = `<span class="update-time">${new Date().toLocaleTimeString()}</span> ${message}`;
+    li.classList.add('update-item');
+    updatesList.prepend(li);
+    if (updatesList.children.length > 10) {
+      updatesList.removeChild(updatesList.lastChild);
+    }
+  }
+
+  // WebSocket event listeners
+  socket.on('flightCreated', (data) => {
+    addUpdate(`New flight created: ${data.airline}${data.flightNum} from ${data.origin} to ${data.destination}`);
+  });
+
+  socket.on('flightUpdated', (data) => {
+    addUpdate(`Flight updated: ${data.airline}${data.flightNum} - ${data.status}`);
+  });
+
+  socket.on('flightDeleted', (data) => {
+    addUpdate(`Flight deleted: ${data.id}`);
+  });
+
+  socket.on('weatherUpdate', (data) => {
+    addUpdate(`Weather update for ${data.airport}: ${data.conditions}, ${data.temperature}°C`);
+  });
+
+  // Additional UI enhancements
+  document.querySelectorAll('.dashboard-panel').forEach(panel => {
+    panel.addEventListener('mouseenter', () => {
+      panel.classList.add('panel-hover');
+    });
+    panel.addEventListener('mouseleave', () => {
+      panel.classList.remove('panel-hover');
+    });
+  });
+
+  // Responsive design adjustments
+  function adjustLayoutForScreenSize() {
+    const dashboardGrid = document.querySelector('.dashboard-grid');
+    if (window.innerWidth < 768) {
+      dashboardGrid.classList.add('mobile-layout');
+    } else {
+      dashboardGrid.classList.remove('mobile-layout');
+    }
+  }
+
+  window.addEventListener('resize', adjustLayoutForScreenSize);
+  adjustLayoutForScreenSize();
+
+  // Initialize tooltips
+  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl);
+  });
+</script>
